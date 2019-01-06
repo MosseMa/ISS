@@ -84,9 +84,6 @@ public class IOUtil {
 
 	public IOUtil() {
 		// TODO Auto-generated constructor stub
-		setExcelArray();
-		setStan_ResultArray();
-		
 	}
 
 

@@ -387,8 +387,7 @@ public class Atlas_Collimator {
 			if (io.autoRun()) {
 				if(monitorExcel(io)) {// 等待天准测试结束，约20秒
 				File excelFile = new File(filename);
-				if (excelFile.exists()) {
-					
+				if (excelFile.exists()) {					
 					io.setExcelArray();
 					io.setStan_ResultArray();
 					int i=io.getResult().size();
