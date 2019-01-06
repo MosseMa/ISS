@@ -13,21 +13,64 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class IOUtil {
-	
-	Properties property=new Properties();
 	ArrayList<Float> result = new ArrayList<Float>();
-
+	Logger log=Logger.getLogger(getClass());
+	Properties Configurationproperty=new Properties();
+	{
+		InputStream proIn=null;
+		String jarPath=System.getProperty("user.dir");
+		String proPath=jarPath+"\\config\\Config.properties";
+		File proFile=new File(proPath);
+		if(proFile!=null) {
+			try {
+				proIn=new FileInputStream(proFile);
+				try {
+					Configurationproperty.load(proIn);
+					log.info("property loaded");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					log.error("propert load eroor");
+				}
+				
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				log.error("can not find the property file");
+			}
+			finally {
+				if(proIn!=null) {
+					try {
+						proIn.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						log.error("IO close error");
+					}
+				}
+			}
+		}
+		
+	}
 	/**
 	 * @return the result
 	 */
 	public ArrayList<Float> getResult() {
 		return result;
+	}
+	/**
+	 * @return the property
+	 */
+	public Properties getConfigurationproperty() {
+		return Configurationproperty;
 	}
 
 	/**
@@ -41,65 +84,106 @@ public class IOUtil {
 
 	public IOUtil() {
 		// TODO Auto-generated constructor stub
+		setExcelArray();
+		setStan_ResultArray();
+		
 	}
 
-	public void setStan_ResultArray() {
 
-		File excelFile = new File("C:\\Users\\212710307\\Desktop\\Task Routine\\Atals Collimator\\TEST.xlsx"); // config
-																												// index
-		InputStream in;
+	public void setStan_ResultArray() {
+		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");
+		String excelName=getConfigurationproperty().getProperty("ResultFileName");
+		String filename=excelPath+excelName;
+		int sheetNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultSheetNumber"));
+		int rowNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultRowNumber"));
+		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultStanColumnNumber"));
+		File excelFile = new File(filename); // config																											// index
+		InputStream in=null;
 
 		try {
 			in = new FileInputStream(excelFile);
 			XSSFWorkbook workbook = new XSSFWorkbook(in);
 			if (workbook != null) {
-				XSSFSheet worksheet = workbook.getSheetAt(0); // config index
+				XSSFSheet worksheet = workbook.getSheetAt(sheetNum); // config index
 				if (worksheet != null) {
-					int ok = worksheet.getLastRowNum();
-					for (int i = 2; i < worksheet.getLastRowNum(); i++) { // config index
+					//int ok = worksheet.getLastRowNum();
+					for (int i = rowNum; i < worksheet.getLastRowNum(); i++) { // config index
 						XSSFRow row = worksheet.getRow(i + 1);
-						XSSFCell cell1 = row.getCell(5); // config index
+						XSSFCell cell1 = row.getCell(columnNum); // config index
 						float ce1 = (float) cell1.getNumericCellValue();
 						Stan_result.add(ce1);
+						
 					}
+					log.info("gained the Standard mean");
 				}
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("can not find the result excel file");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("IO error on gainning the standard mean step");
 		}
-
+		finally {
+			if(in!=null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					log.error("IO error on closing the standard mean step");
+				}
+			}
+		}
 	}
 
 	public void setExcelArray() {
-
-		File excelFile = new File("C:\\Users\\212710307\\Desktop\\Task Routine\\Atals Collimator\\TEST.xlsx"); // config
-																												// index
-		InputStream in;
+		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");//C:\Users\212710307\Desktop\Task Routine\Atals Collimator\TEST.xlsx
+		String excelName=getConfigurationproperty().getProperty("ResultFileName");
+		String filename=excelPath+excelName;
+		int sheetNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultSheetNumber"));//0
+		int rowNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultRowNumber"));//2
+		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultColumnNumber"));//12
+		File excelFile = new File(filename); // config	
+		InputStream in=null;
 		try {
 			in = new FileInputStream(excelFile);
 			XSSFWorkbook workbook = new XSSFWorkbook(in);
 			if (workbook != null) {
-				XSSFSheet worksheet = workbook.getSheetAt(0); // config index
+				XSSFSheet worksheet = workbook.getSheetAt(sheetNum); // config index
 				if (worksheet != null) {
 					int ok = worksheet.getLastRowNum();
-					for (int i = 2; i < worksheet.getLastRowNum(); i++) { // config index
+					for (int i = rowNum; i < worksheet.getLastRowNum(); i++) { // config index
 						XSSFRow row = worksheet.getRow(i + 1);
-						XSSFCell cell = row.getCell(12); // config index
+						XSSFCell cell = row.getCell(columnNum); // config index
 						float ce = (float) cell.getNumericCellValue();
 						result.add(ce);
+						
 					}
+					log.info("gained the measure result");
 				}
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("can not find the result excel on gainning measure step");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("IO error on gainning the measure value step");
+		}
+		finally {
+			if(in!=null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					log.error("IO error on closing the measure value step");
+				}
+			}
 		}
 	}
 
@@ -113,7 +197,14 @@ public class IOUtil {
 			Array.add(Resultarray.get(i) - Stan_Array.get(i));
 		}
 		max = Collections.max(Array);
+		if(head==0) {
+		log.info("gained the ID side max");
+		}
+		else {
+			log.info("gained the OD side max");
+		}
 		return max;
+		
 	}
 
 	// 获取OD&ID面测试最小值
@@ -126,6 +217,12 @@ public class IOUtil {
 			Array.add(Resultarray.get(i) - Stan_Array.get(i));
 		}
 		min = Collections.min(Array);
+		if(head==0) {
+		log.info("gained the ID side min");
+		}
+		else {
+			log.info("gained the OD side min");
+		}
 		return min;
 	}
 
@@ -138,6 +235,7 @@ public class IOUtil {
 				Array.add(ResultArray.get(i));
 			}
 		}
+		log.info("get the ID bottom array");
 		return Array;
 	}
 
@@ -150,6 +248,7 @@ public class IOUtil {
 				Array.add(ResultArray.get(i + 3));
 			}
 		}
+		log.info("get the ID top array");
 		return Array;
 	}
 
@@ -162,6 +261,7 @@ public class IOUtil {
 				Array.add(ResultArray.get(i + 3));
 			}
 		}
+		log.info("get the OD top array");
 		return Array;
 	}
 
@@ -174,6 +274,7 @@ public class IOUtil {
 				Array.add(ResultArray.get(i));
 			}
 		}
+		log.info("get the OD BOTTOM array");
 		return Array;
 	}
 
@@ -183,6 +284,7 @@ public class IOUtil {
 		for (int i = 0; i < getID_Bottom().size(); i++) {
 			Array.add(getID_Bottom().get(i) - getOD_Bottom().get(i));
 		}
+		log.info("get the bottom variant array");
 		return Array;
 	}
 
@@ -192,11 +294,14 @@ public class IOUtil {
 		for (int i = 0; i < getID_Bottom().size(); i++) {
 			Array.add(getID_Top().get(i) - getOD_Top().get(i));
 		}
+		log.info("get the top variant array");
 		return Array;
 	}
 
 	// 判定collimator等级
 	public String classResult() {
+		float USL=Float.parseFloat(getConfigurationproperty().getProperty("MaxClassSpec"));//0.006
+		float LSL=Float.parseFloat(getConfigurationproperty().getProperty("MinClassSpec"));//-0.006
 		ArrayList<Float> Array = new ArrayList<Float>();
 		String classResult = "";
 		float sum = 0;
@@ -205,19 +310,22 @@ public class IOUtil {
 			sum = sum + Array.get(i);
 		}
 		float mean = sum / Array.size();
-		if (mean > -0.006 && mean < 0.006) {
+		if (mean > LSL && mean < USL) {
 			classResult = "C1";
 		} else {
 			classResult = "NO";
 		}
+		log.info("get the classresult:"+classResult);
 		return classResult;
 	}
 
 	// PASS / FAIL 判定
 	public String passResult() {
+		float CTQ_USL=Float.parseFloat(getConfigurationproperty().getProperty("MaxSpec"));
+		float CTQ_LSL=Float.parseFloat(getConfigurationproperty().getProperty("MinSpec"));
 		String pass = "";
 		try {
-			if (min(0, 547) > -0.045 && max(0, 547) < 0.045 && min(548, 1095) > -0.045 && max(548, 1095) < 0.045) {
+			if (min(0, 547) > CTQ_LSL && max(0, 547) < CTQ_USL && min(548, 1095) > CTQ_LSL && max(548, 1095) < CTQ_USL) {
 				pass = "PASS";
 			} else {
 				pass = "FAIL";
@@ -228,43 +336,53 @@ public class IOUtil {
 			e.printStackTrace();
 			pass = "ERROR";
 		}
+		log.info("get the passresult:"+pass);
 		return pass;
 	}
 
 	public void exportResult(String SN) throws IOException {
+		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");//C:\Users\212710307\Desktop\Task Routine\Atals Collimator\TEST.xlsx
+		String excelName=getConfigurationproperty().getProperty("ResultFileName");
+		String filename=excelPath+excelName;
+		File excelFile=new File(filename);
+		String exportPath=getConfigurationproperty().getProperty("ResultExportPath");
+		String DateFormat=getConfigurationproperty().getProperty("DateFormat");
 		Writer writer = null;
 		Date date = new Date();
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss"); // 日期格式中月份字母需要大写
-		File exportResult = new File("C:\\Users\\212710307\\Desktop\\Task Routine\\Atals Collimator\\" + SN + "_"
-				+ format.format(date) + ".csv");
+		SimpleDateFormat format = new SimpleDateFormat(DateFormat); // 日期格式中月份字母需要大写
+		File exportResult = new File(exportPath + SN + "_"+ format.format(date) + ".csv");
 		StringBuffer buffer = new StringBuffer();
 		try {
 			writer = new FileWriter(exportResult);
-			int ok = getResult().size();
 			for (int i = 0; i < getResult().size(); i++) {
 				buffer.append(getResult().get(i).toString());
 				buffer.append("\n");
 			}
 			writer.write(buffer.toString());
+			log.info("write into the csv and saved");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (writer != null) {
 				writer.close();
+				if(excelFile.exists()) {
+					excelFile.delete();
+				}
 			}
 		}
 	}
-
+	
 	public boolean autoRun() {
-		String path = "C:\\Users\\212710307\\Desktop\\Task Routine\\Atals Collimator\\TEST.txt";
-		File TETZKfile = new File(path);
+		String autorunPath=getConfigurationproperty().getProperty("AutorunPath");
+		File TETZKfile = new File(autorunPath);
 		Writer writer = null;
 		try {
 			writer = new FileWriter(TETZKfile);
 			if (TETZKfile.exists()) {
 				TETZKfile.delete();
-				writer.write(path);
+				writer.write(autorunPath);
+				log.info("created the autorun file");
 			}
 
 		} catch (IOException e) {
@@ -282,7 +400,6 @@ public class IOUtil {
 				}
 			}
 		}
-		;
 		return true;
 	}
 }
