@@ -108,23 +108,23 @@ public class Atlas_Collimator {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
-				if(e.getKeyCode()==10) {
+				if (e.getKeyCode() == 10) {
 					String sso = SSOText.getText();
 					String regx = "\\d{9}";
-						if (sso.matches(regx)) {
-							SSOFORMAT.setText("");
-							SNText.grabFocus();
-						} else {
-							SSOFORMAT.setText("Format Error");
-							SSOText.setText("");
-						}
+					if (sso.matches(regx)) {
+						SSOFORMAT.setText("");
+						SNText.grabFocus();
+					} else {
+						SSOFORMAT.setText("Format Error");
+						SSOText.setText("");
+					}
 				}
 			}
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
@@ -149,24 +149,8 @@ public class Atlas_Collimator {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
-				if(e.getKeyCode()==10) {
+				if (e.getKeyCode() == 10) {
 					String sn = SNText.getText();
-						if (sn.matches(regx1) || sn.matches(regx2)) {
-							SNFORMAT.setText("");
-							SUBMIT.grabFocus();
-						} else {
-							SNFORMAT.setText("Format Error");
-							SNText.setText("");
-						}
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				String sn = SNText.getText();
-				if(sn!=null) {
-				if(sn.length()>8) {
 					if (sn.matches(regx1) || sn.matches(regx2)) {
 						SNFORMAT.setText("");
 						SUBMIT.grabFocus();
@@ -175,6 +159,22 @@ public class Atlas_Collimator {
 						SNText.setText("");
 					}
 				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				// TODO Auto-generated method stub
+				String sn = SNText.getText();
+				if (sn != null) {
+					if (sn.length() > 8) {
+						if (sn.matches(regx1) || sn.matches(regx2)) {
+							SNFORMAT.setText("");
+							SUBMIT.grabFocus();
+						} else {
+							SNFORMAT.setText("Format Error");
+							SNText.setText("");
+						}
+					}
 				}
 			}
 
@@ -196,7 +196,7 @@ public class Atlas_Collimator {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
-				if(e.getKeyCode()==10) {
+				if (e.getKeyCode() == 10) {
 					try {
 						enterEvent();
 					} catch (HeadlessException | InterruptedException e1) {
@@ -209,15 +209,15 @@ public class Atlas_Collimator {
 			@Override
 			public void keyReleased(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 		});
 
 		JButton CANCEL = new JButton("CANCEL");
@@ -225,7 +225,7 @@ public class Atlas_Collimator {
 		CANCEL.setBounds(252, 266, 104, 42);
 		frame.getContentPane().add(CANCEL);
 		CANCEL.addActionListener(action);
-		
+
 		JPanel panel = new JPanel();
 		panel.setBorder(new LineBorder(Color.LIGHT_GRAY));
 		panel.setBounds(57, 343, 376, 144);
@@ -307,21 +307,21 @@ public class Atlas_Collimator {
 					e1.printStackTrace();
 				}
 			}
-			//CANCEL action
-			if("CANCEL".equals(button)) {
+			// CANCEL action
+			if ("CANCEL".equals(button)) {
 				resetting();
 			}
-			
+
 		}
 
 	}
 
 	public boolean emptyCheck(String str) {
-			if (str != null && !"".equals(str)) {
-				return true;
-			}
+		if (str != null && !"".equals(str)) {
+			return true;
+		}
 		return false;
-		
+
 	}
 
 	public void errorSetting() {
@@ -333,6 +333,7 @@ public class Atlas_Collimator {
 		CLASS.setText("");
 		SNText.grabFocus();
 	}
+
 	public void resetting() {
 		RESULT.setText("");
 		ODMAX.setText("");
@@ -343,26 +344,32 @@ public class Atlas_Collimator {
 		SNText.setText("");
 		SNText.grabFocus();
 	}
-	//监控测试结果文件文件是否生成
-	public  boolean monitorExcel(IOUtil io) throws InterruptedException {
+
+	// 监控测试结果文件文件是否生成
+	public boolean monitorExcel(IOUtil io) throws InterruptedException {
 		WatchService fileWatch;
-		String filePath=io.getConfigurationproperty().getProperty("ResultReadPath");
-		String fileName=io.getConfigurationproperty().getProperty("ResultFileName");
+		String filePath = io.getConfigurationproperty().getProperty("ResultReadPath");
+		String fileName = io.getConfigurationproperty().getProperty("ResultFileName");
+
 		try {
-			fileWatch=FileSystems.getDefault().newWatchService();
+			fileWatch = FileSystems.getDefault().newWatchService();
 			Paths.get(filePath).register(fileWatch, StandardWatchEventKinds.ENTRY_CREATE,
-					StandardWatchEventKinds.ENTRY_MODIFY);		
-			while(true) {
-				WatchKey key=fileWatch.take();
+					StandardWatchEventKinds.ENTRY_MODIFY);
+			while (true) {
+				WatchKey key = fileWatch.take();
 				for (WatchEvent<?> event : key.pollEvents()) {
-			        if(StandardWatchEventKinds.ENTRY_CREATE == event.kind()||StandardWatchEventKinds.ENTRY_MODIFY==event.kind()){
-			        	System.out.println(event.context());
-			        	return true;
-			        }
-			}
-				boolean valid = key.reset();
-				if (!valid) {
-					break;
+					if (StandardWatchEventKinds.ENTRY_CREATE == event.kind()
+							|| StandardWatchEventKinds.ENTRY_MODIFY == event.kind()) {
+						System.out.println(event.context() + " was " + event.kind());
+						if (fileName.equals(event.context().toString())) {
+							return true;
+						}
+						boolean valid = key.reset();
+						if (!valid) {
+							break;
+						}
+
+					}
 				}
 
 			}
@@ -373,74 +380,81 @@ public class Atlas_Collimator {
 		return false;
 
 	}
+
 	public boolean dataCorruptCheck() {
 
 		return false;
 	}
+
 	public void enterEvent() throws HeadlessException, InterruptedException {
 		IOUtil io = new IOUtil();
 		io.getConfigurationproperty();
-		String path=io.getConfigurationproperty().getProperty("ResultReadPath");
-		String excelName=io.getConfigurationproperty().getProperty("ResultFileName");
-		String filename=path+excelName;
+		String path = io.getConfigurationproperty().getProperty("ResultReadPath");
+		String excelName = io.getConfigurationproperty().getProperty("ResultFileName");
+		String filename = path + excelName;
 		if (emptyCheck(SSOText.getText()) && emptyCheck(SNText.getText())) {
 			if (io.autoRun()) {
-				if(monitorExcel(io)) {// 等待天准测试结束，约20秒
-				File excelFile = new File(filename);
-				if (excelFile.exists()) {					
-					io.setExcelArray();
-					io.setStan_ResultArray();
-					int i=io.getResult().size();
-					if (io.getResult().size() == 1096) {  //需要区分normal与非normal
-						if ("PASS".equals(io.passResult())) {
-							RESULT.setText("PASS");
-							try {
-								IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
-								IDMAX.setText(io.max(0, 547).toString().substring(0, 7));
-								ODMAX.setText(io.max(548, 1095).toString().substring(0, 7));
-								ODMIN.setText(io.min(548, 1095).toString().substring(0, 7));
-								if("C1".equals(io.classResult())) {
-								  CLASS.setText("C1");
-								  io.exportResult(SNText.getText()); 
-								  SNText.setText("");
-								  SNText.grabFocus();
-								  } else {											  
-								  CLASS.setText("NO");
-								  io.exportResult(SNText.getText());
-								  SNText.setText("");
-								  SNText.grabFocus();
-								  }										   
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-								JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
-								errorSetting();
-							}
-						} else if ("FAIL".equals(io.passResult())) {
-							RESULT.setText("FAIL");
-							try {
-								IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
-								IDMAX.setText(io.max(0, 547).toString().substring(0, 7));
-								ODMAX.setText(io.max(548, 1095).toString().substring(0, 7));
-								ODMIN.setText(io.min(548, 1095).toString().substring(0, 7));
-								io.exportResult(SNText.getText());
-								SNText.setText("");
-								SNText.grabFocus();
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
+				if (monitorExcel(io)) {// 检测文件夹中是否生成测试结果文件
+					Thread.sleep(1000);//	防止文件监控进程关闭滞后导致的IO管道占用报错,java.io.FileNotFoundException: C:\Users\212710307\Desktop\Task_Routine\Atals_Collimator\Result\TEST.xlsx (The process cannot access the file because it is being used by another process)
+					File excelFile = new File(filename);
+					if (excelFile.exists()) {
+						try {
+							io.setExcelArray();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						int i = io.getResult().size();
+						if (io.getResult().size() == 1096) { // 需要区分normal与非normal
+							if ("PASS".equals(io.passResult())) {
+								RESULT.setText("PASS");
+								try {
+									IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
+									IDMAX.setText(io.max(0, 547).toString().substring(0, 7));
+									ODMAX.setText(io.max(548, 1095).toString().substring(0, 7));
+									ODMIN.setText(io.min(548, 1095).toString().substring(0, 7));
+									if ("C1".equals(io.classResult())) {
+										CLASS.setText("C1");
+										io.exportResult(SNText.getText());
+										SNText.setText("");
+										SNText.grabFocus();
+									} else {
+										CLASS.setText("NO");
+										io.exportResult(SNText.getText());
+										SNText.setText("");
+										SNText.grabFocus();
+									}
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+									JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
+									errorSetting();
+								}
+							} else if ("FAIL".equals(io.passResult())) {
+								RESULT.setText("FAIL");
+								try {
+									IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
+									IDMAX.setText(io.max(0, 547).toString().substring(0, 7));
+									ODMAX.setText(io.max(548, 1095).toString().substring(0, 7));
+									ODMIN.setText(io.min(548, 1095).toString().substring(0, 7));
+									io.exportResult(SNText.getText());
+									SNText.setText("");
+									SNText.grabFocus();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+									JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
+									errorSetting();
+								}
+							} else {
 								JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
 								errorSetting();
 							}
 						} else {
-							JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
+							JOptionPane.showMessageDialog(frame, "天准生成数据错误，请确认");
 							errorSetting();
 						}
-					} else {
-						JOptionPane.showMessageDialog(frame, "天准生成数据错误，请确认");
-						errorSetting();
 					}
-				}
 				}
 			} else {
 				JOptionPane.showMessageDialog(frame, "autorun 文件生成失败");
@@ -450,4 +464,4 @@ public class Atlas_Collimator {
 		}
 
 	}
-		}
+}

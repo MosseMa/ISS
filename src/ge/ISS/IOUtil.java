@@ -86,14 +86,15 @@ public class IOUtil {
 		// TODO Auto-generated constructor stub
 	}
 
-
+/*
 	public void setStan_ResultArray() {
 		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");
 		String excelName=getConfigurationproperty().getProperty("ResultFileName");
 		String filename=excelPath+excelName;
 		int sheetNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultSheetNumber"));
 		int rowNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultRowNumber"));
-		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultStanColumnNumber"));
+		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultColumnNumber"));
+		int stancolumnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultStanColumnNumber"));
 		File excelFile = new File(filename); // config																											// index
 		InputStream in=null;
 
@@ -106,12 +107,15 @@ public class IOUtil {
 					//int ok = worksheet.getLastRowNum();
 					for (int i = rowNum; i < worksheet.getLastRowNum(); i++) { // config index
 						XSSFRow row = worksheet.getRow(i + 1);
-						XSSFCell cell1 = row.getCell(columnNum); // config index
+						XSSFCell cell1 = row.getCell(columnNum); // config index 12
+						XSSFCell cell = row.getCell(stancolumnNum); // config index	5
 						float ce1 = (float) cell1.getNumericCellValue();
-						Stan_result.add(ce1);
+						float ce = (float) cell.getNumericCellValue();
+						Stan_result.add(ce);
+						result.add(ce1);
 						
 					}
-					log.info("gained the Standard mean");
+					log.info("gained the Standard mean	and	measure	value");
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -134,14 +138,15 @@ public class IOUtil {
 				}
 			}
 		}
-	}
+	}*/
 
-	public void setExcelArray() {
+	public void setExcelArray() throws IOException {
 		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");//C:\Users\212710307\Desktop\Task Routine\Atals Collimator\TEST.xlsx
 		String excelName=getConfigurationproperty().getProperty("ResultFileName");
 		String filename=excelPath+excelName;
 		int sheetNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultSheetNumber"));//0
 		int rowNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultRowNumber"));//2
+		int StancolumnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultStanColumnNumber"));
 		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultColumnNumber"));//12
 		File excelFile = new File(filename); // config	
 		InputStream in=null;
@@ -155,21 +160,20 @@ public class IOUtil {
 					for (int i = rowNum; i < worksheet.getLastRowNum(); i++) { // config index
 						XSSFRow row = worksheet.getRow(i + 1);
 						XSSFCell cell = row.getCell(columnNum); // config index
+						XSSFCell stancell = row.getCell(StancolumnNum); // config index		
 						float ce = (float) cell.getNumericCellValue();
+						float stance = (float) stancell.getNumericCellValue();
 						result.add(ce);
+						Stan_result.add(stance);
 						
 					}
-					log.info("gained the measure result");
+					log.info("gained the measure result and stan	result");
 				}
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			log.error("can not find the result excel on gainning measure step");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.error("IO error on gainning the measure value step");
 		}
 		finally {
 			if(in!=null) {
@@ -182,6 +186,7 @@ public class IOUtil {
 				}
 			}
 		}
+
 	}
 
 	// 求取OD&ID面测试最大值
@@ -379,6 +384,7 @@ public class IOUtil {
 			if (TETZKfile.exists()) {
 				TETZKfile.delete();
 				writer.write(autorunPath);
+				writer.flush();
 				log.info("created the autorun file");
 			}
 
