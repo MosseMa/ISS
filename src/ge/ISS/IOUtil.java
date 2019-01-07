@@ -86,60 +86,6 @@ public class IOUtil {
 		// TODO Auto-generated constructor stub
 	}
 
-/*
-	public void setStan_ResultArray() {
-		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");
-		String excelName=getConfigurationproperty().getProperty("ResultFileName");
-		String filename=excelPath+excelName;
-		int sheetNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultSheetNumber"));
-		int rowNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultRowNumber"));
-		int columnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultColumnNumber"));
-		int stancolumnNum=Integer.parseInt(getConfigurationproperty().getProperty("ResultStanColumnNumber"));
-		File excelFile = new File(filename); // config																											// index
-		InputStream in=null;
-
-		try {
-			in = new FileInputStream(excelFile);
-			XSSFWorkbook workbook = new XSSFWorkbook(in);
-			if (workbook != null) {
-				XSSFSheet worksheet = workbook.getSheetAt(sheetNum); // config index
-				if (worksheet != null) {
-					//int ok = worksheet.getLastRowNum();
-					for (int i = rowNum; i < worksheet.getLastRowNum(); i++) { // config index
-						XSSFRow row = worksheet.getRow(i + 1);
-						XSSFCell cell1 = row.getCell(columnNum); // config index 12
-						XSSFCell cell = row.getCell(stancolumnNum); // config index	5
-						float ce1 = (float) cell1.getNumericCellValue();
-						float ce = (float) cell.getNumericCellValue();
-						Stan_result.add(ce);
-						result.add(ce1);
-						
-					}
-					log.info("gained the Standard mean	and	measure	value");
-				}
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.error("can not find the result excel file");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			log.error("IO error on gainning the standard mean step");
-		}
-		finally {
-			if(in!=null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					log.error("IO error on closing the standard mean step");
-				}
-			}
-		}
-	}*/
-
 	public void setExcelArray() throws IOException {
 		String excelPath=getConfigurationproperty().getProperty("ResultReadPath");//C:\Users\212710307\Desktop\Task Routine\Atals Collimator\TEST.xlsx
 		String excelName=getConfigurationproperty().getProperty("ResultFileName");
@@ -164,8 +110,7 @@ public class IOUtil {
 						float ce = (float) cell.getNumericCellValue();
 						float stance = (float) stancell.getNumericCellValue();
 						result.add(ce);
-						Stan_result.add(stance);
-						
+						Stan_result.add(stance);						
 					}
 					log.info("gained the measure result and stan	result");
 				}
@@ -231,7 +176,7 @@ public class IOUtil {
 	// 获取OD面bottom侧测试数据
 	public ArrayList<Float> getID_Bottom() {
 		ArrayList<Float> Array = new ArrayList<Float>();
-		List<Float> ResultArray = getResult().subList(0, 547);
+		List<Float> ResultArray = getResult().subList(0, getResult().size()/2-1);
 		for (int i = 0; i < ResultArray.size() / 4; i++) {
 			if (i % 4 == 0) {
 				Array.add(ResultArray.get(i));
@@ -244,7 +189,7 @@ public class IOUtil {
 	// 获取OD面top侧测试数据
 	public ArrayList<Float> getID_Top() {
 		ArrayList<Float> Array = new ArrayList<Float>();
-		List<Float> ResultArray = getResult().subList(0, 547);
+		List<Float> ResultArray = getResult().subList(0, getResult().size()/2-1);
 		for (int i = 0; i < ResultArray.size() / 4; i++) {
 			if (i % 4 == 0) {
 				Array.add(ResultArray.get(i + 3));
@@ -257,7 +202,7 @@ public class IOUtil {
 	// 获取ID面top侧测试数据
 	public ArrayList<Float> getOD_Top() {
 		ArrayList<Float> Array = new ArrayList<Float>();
-		List<Float> ResultArray = getResult().subList(548, 1095);
+		List<Float> ResultArray = getResult().subList(getResult().size()/2, getResult().size()-1);
 		for (int i = 0; i < ResultArray.size() / 4; i++) {
 			if (i % 4 == 0) {
 				Array.add(ResultArray.get(i + 3));
@@ -270,7 +215,7 @@ public class IOUtil {
 	// 获取ID面top侧测试数据
 	public ArrayList<Float> getOD_Bottom() {
 		ArrayList<Float> Array = new ArrayList<Float>();
-		List<Float> ResultArray = getResult().subList(548, 1095);
+		List<Float> ResultArray = getResult().subList(getResult().size()/2, getResult().size()-1);
 		for (int i = 0; i < ResultArray.size() / 4; i++) {
 			if (i % 4 == 0) {
 				Array.add(ResultArray.get(i));
@@ -322,15 +267,25 @@ public class IOUtil {
 	}
 
 	// PASS / FAIL 判定
-	public String passResult() {
+	public String passResult(String sn) {
 		float CTQ_USL=Float.parseFloat(getConfigurationproperty().getProperty("MaxSpec"));
 		float CTQ_LSL=Float.parseFloat(getConfigurationproperty().getProperty("MinSpec"));
+		int RT_arrayLength=Integer.parseInt(getConfigurationproperty().getProperty("RT_Length"));
+		int T_arrayLength=Integer.parseInt(getConfigurationproperty().getProperty("T_Length"));
 		String pass = "";
 		try {
-			if (min(0, 547) > CTQ_LSL && max(0, 547) < CTQ_USL && min(548, 1095) > CTQ_LSL && max(548, 1095) < CTQ_USL) {
+			if(sn.contains("R")) { //reference 判断
+			if (min(0, RT_arrayLength/2-1) > CTQ_LSL && max(0, RT_arrayLength/2-1) < CTQ_USL && min(RT_arrayLength/2, RT_arrayLength) > CTQ_LSL && max(RT_arrayLength/2, RT_arrayLength) < CTQ_USL) {
 				pass = "PASS";
 			} else {
 				pass = "FAIL";
+			}
+			}else{			//normal 判断
+				if (min(0, T_arrayLength/2-1) > CTQ_LSL && max(0, T_arrayLength/2-1) < CTQ_USL && min(T_arrayLength/2, T_arrayLength) > CTQ_LSL && max(T_arrayLength/2, RT_arrayLength) < CTQ_USL) {
+					pass = "PASS";
+				} else {
+					pass = "FAIL";
+				}
 			}
 
 		} catch (IOException e) {
@@ -376,14 +331,20 @@ public class IOUtil {
 	}
 	
 	public boolean autoRun() {
-		String autorunPath=getConfigurationproperty().getProperty("AutorunPath");
-		File TETZKfile = new File(autorunPath);
+		String autorunPath=getConfigurationproperty().getProperty("AutorunPath"); 
+		String autorunFile=getConfigurationproperty().getProperty("AutorunFileName");
+		String taskPath=getConfigurationproperty().getProperty("TETZK_TaskPath");
+		String taskName=getConfigurationproperty().getProperty("TETZK_Task");		
+		String autorun=autorunPath+autorunFile;
+		String task=taskPath+taskName;
+		
+		File TETZKfile = new File(autorun);
 		Writer writer = null;
 		try {
 			writer = new FileWriter(TETZKfile);
 			if (TETZKfile.exists()) {
-				TETZKfile.delete();
-				writer.write(autorunPath);
+				TETZKfile.exists();
+				writer.write(task);
 				writer.flush();
 				log.info("created the autorun file");
 			}

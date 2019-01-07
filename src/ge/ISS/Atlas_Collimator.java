@@ -165,8 +165,19 @@ public class Atlas_Collimator {
 			public void keyReleased(KeyEvent arg0) {
 				// TODO Auto-generated method stub
 				String sn = SNText.getText();
-				if (sn != null) {
+				if(sn.contains("R")) {
 					if (sn.length() > 8) {
+						if (sn.matches(regx1) || sn.matches(regx2)) {
+							SNFORMAT.setText("");
+							SUBMIT.grabFocus();
+						} else {
+							SNFORMAT.setText("Format Error");
+							SNText.setText("");
+						}
+					}
+				}
+				else {
+					if (sn.length() > 7) {
 						if (sn.matches(regx1) || sn.matches(regx2)) {
 							SNFORMAT.setText("");
 							SUBMIT.grabFocus();
@@ -381,9 +392,17 @@ public class Atlas_Collimator {
 
 	}
 
-	public boolean dataCorruptCheck() {
-
-		return false;
+	public int dataCorruptCheck(IOUtil io,String SN) {
+		int length=0;
+		String Normal_Length=io.getConfigurationproperty().getProperty("T_Length");//1096
+		String Reference_Length=io.getConfigurationproperty().getProperty("RT_Length");//40
+		if(SN.contains("R")) {
+			length=Integer.parseInt(Reference_Length);
+		}
+		else {
+			length=Integer.parseInt(Normal_Length);
+		}
+		return length;
 	}
 
 	public void enterEvent() throws HeadlessException, InterruptedException {
@@ -405,14 +424,14 @@ public class Atlas_Collimator {
 							e.printStackTrace();
 						}
 						int i = io.getResult().size();
-						if (io.getResult().size() == 1096) { // 需要区分normal与非normal
-							if ("PASS".equals(io.passResult())) {
+						if (io.getResult().size() == dataCorruptCheck(io,SNText.getText())) { // 区分normal与reference
+							if ("PASS".equals(io.passResult(SNText.getText()))) {
 								RESULT.setText("PASS");
 								try {
-									IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
-									IDMAX.setText(io.max(0, 547).toString().substring(0, 7));
-									ODMAX.setText(io.max(548, 1095).toString().substring(0, 7));
-									ODMIN.setText(io.min(548, 1095).toString().substring(0, 7));
+									IDMIN.setText(io.min(0, io.getResult().size()/2-1).toString().substring(0, 7));
+									IDMAX.setText(io.max(0, io.getResult().size()/2-1).toString().substring(0, 7));
+									ODMAX.setText(io.max(io.getResult().size()/2, io.getResult().size()-1).toString().substring(0, 7));
+									ODMIN.setText(io.min(io.getResult().size()/2, io.getResult().size()-1).toString().substring(0, 7));
 									if ("C1".equals(io.classResult())) {
 										CLASS.setText("C1");
 										io.exportResult(SNText.getText());
@@ -430,7 +449,7 @@ public class Atlas_Collimator {
 									JOptionPane.showMessageDialog(frame, "极值计算失败，请确认");
 									errorSetting();
 								}
-							} else if ("FAIL".equals(io.passResult())) {
+							} else if ("FAIL".equals(io.passResult(SNText.getText()))) {
 								RESULT.setText("FAIL");
 								try {
 									IDMIN.setText(io.min(0, 547).toString().substring(0, 7));
